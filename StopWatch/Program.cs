@@ -1,32 +1,63 @@
-﻿namespace StopWatch
+﻿using System;
+using System.Threading;
+
+namespace StopWatch
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             Menu();
         }
-        
+
         static void Menu()
         {
-            Console.Clear();
-            Console.WriteLine("S = Segundo => 10s = 10 Segundos");
-            Console.WriteLine("M = Minuto => 1m = 1 Minuto");
-            Console.WriteLine("0 = Sair");
-            Console.WriteLine("Quanto tempo deseja contar?");
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("S = Segundo => 10s = 10 Segundos");
+                Console.WriteLine("M = Minuto => 1m = 1 Minuto");
+                Console.WriteLine("0 = Sair");
+                Console.WriteLine("Quanto tempo deseja contar?");
 
-            string data = Console.ReadLine().ToLower();
-            char type = char.Parse(data.Substring(data.Length - 1, 1));
-            int time = int.Parse(data.Substring(0, data.Length - 1));
-            int multiplier = 1;
-            
-            if (type == 'm')
-                multiplier = 60;
-            
-            if (time == 0)
-                System.Environment.Exit(0);
-            
-            PreStart(time * multiplier);
+                string data = Console.ReadLine()?.ToLower();
+
+                if (data == "0")
+                    Environment.Exit(0);
+
+                if (string.IsNullOrWhiteSpace(data) || data.Length < 2)
+                {
+                    Console.WriteLine("Entrada inválida! Pressione qualquer tecla para tentar novamente...");
+                    Console.ReadKey();
+                    continue;
+                }
+
+                char type = data[^1];
+                string numberPart = data[..^1];
+
+                if (!int.TryParse(numberPart, out int time) || time <= 0)
+                {
+                    Console.WriteLine("Erro: Digite um valor numérico válido maior que zero.");
+                    Console.ReadKey();
+                    continue;
+                }
+
+                int multiplier = type switch
+                {
+                    'm' => 60,
+                    's' => 1,
+                    _ => -1 // Indica erro
+                };
+
+                if (multiplier == -1)
+                {
+                    Console.WriteLine("Erro: Unidade de tempo inválida! Use 's' para segundos ou 'm' para minutos.");
+                    Console.ReadKey();
+                    continue;
+                }
+
+                PreStart(time * multiplier);
+            }
         }
 
         static void PreStart(int time)
@@ -38,27 +69,22 @@
             Thread.Sleep(1000);
             Console.WriteLine("Go...");
             Thread.Sleep(2500);
-            
+
             Start(time);
         }
 
-        #region MyRegion
         static void Start(int time)
         {
-            int currentTime = 0;
-            
-            while (currentTime != time)
+            for (int i = time; i > 0; i--)
             {
                 Console.Clear();
-                currentTime++;
-                Console.WriteLine(currentTime);
+                Console.WriteLine($"Tempo restante: {i} segundos");
                 Thread.Sleep(1000);
             }
+
             Console.Clear();
-            Console.WriteLine("Stop Watch Finalizado");
+            Console.WriteLine("Stopwatch Finalizado!");
             Thread.Sleep(2500);
-            Menu();
         }
-        #endregion
     }
 }
